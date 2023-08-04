@@ -166,6 +166,7 @@ pub struct WebauthnBuilder<'a> {
     allow_subdomains: bool,
     allow_any_port: bool,
     algorithms: Vec<COSEAlgorithm>,
+    authenticator_timeout: Option<u32>,
 }
 
 impl<'a> WebauthnBuilder<'a> {
@@ -220,6 +221,7 @@ impl<'a> WebauthnBuilder<'a> {
                 allow_subdomains: false,
                 allow_any_port: false,
                 algorithms: COSEAlgorithm::secure_algs(),
+                authenticator_timeout: None,
             })
         } else {
             error!("rp_id is not an effective_domain of rp_origin");
@@ -262,6 +264,12 @@ impl<'a> WebauthnBuilder<'a> {
         self
     }
 
+    /// Set the authenticator_timeout
+    pub fn authenticator_timeout(mut self, authenticator_timeout: u32) -> Self {
+        self.authenticator_timeout = Some(authenticator_timeout);
+        self
+    }
+
     /// Complete the construction of the [Webauthn] instance. If an invalid configuration setting
     /// is found, an Error may be returned.
     ///
@@ -284,7 +292,7 @@ impl<'a> WebauthnBuilder<'a> {
                 self.rp_name.unwrap_or(self.rp_id),
                 self.rp_id,
                 self.allowed_origins,
-                None,
+                self.authenticator_timeout,
                 Some(self.allow_subdomains),
                 Some(self.allow_any_port),
             ),
